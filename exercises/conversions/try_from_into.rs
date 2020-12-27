@@ -11,8 +11,6 @@ struct Color {
     blue: u8,
 }
 
-// I AM NOT DONE
-
 // Your task is to complete this implementation
 // and return an Ok result of inner type Color.
 // You need create implementation for a tuple of three integer,
@@ -25,24 +23,63 @@ struct Color {
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = String;
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {}
+    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let bounds = 0..256;
+        match tuple {
+            (r, g, b) if bounds.contains(&r) && bounds.contains(&g) && bounds.contains(&b) => {
+                let red = u8::try_from(r).unwrap();
+                let green = u8::try_from(g).unwrap();
+                let blue = u8::try_from(b).unwrap();
+
+                Ok(Color { red, green, blue })
+            },
+            _ => Err(String::from("Couldn't convert tuples to Color"))
+        }
+    }
 }
 
 // Array implementation
 impl TryFrom<[i16; 3]> for Color {
     type Error = String;
-    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {}
+    fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        let bounds = 0..256;
+        match arr {
+            [r, g, b] if bounds.contains(&r) && bounds.contains(&g) && bounds.contains(&b) => {
+                let red = u8::try_from(r).unwrap();
+                let green = u8::try_from(g).unwrap();
+                let blue = u8::try_from(b).unwrap();
+
+                Ok(Color { red, green, blue })
+            },
+            _ => Err(String::from("Couldn't convert array to Color"))
+        }
+    }
 }
 
 // Slice implementation
 impl TryFrom<&[i16]> for Color {
     type Error = String;
-    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {}
+    fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() != 3 {
+            return Err(String::from("Need 3 element in slice to create a Color"))
+        }
+        let bounds = 0..256;
+        match slice {
+            [r, g, b] if bounds.contains(r) && bounds.contains(g) && bounds.contains(b) => {
+                let red = u8::try_from(*r).unwrap();
+                let green = u8::try_from(*g).unwrap();
+                let blue = u8::try_from(*b).unwrap();
+
+                Ok(Color { red, green, blue })
+            },
+            _ => Err(String::from("Couldn't convert slice to Color"))
+        }
+    }
 }
 
 fn main() {
     // Use the `from` function
-    let c1 = Color::try_from((183, 65, 14));
+    let c1 = Color::try_from((183, 65, 14)).unwrap();
     println!("{:?}", c1);
 
     // Since From is implemented for Color, we should be able to use Into
@@ -88,17 +125,17 @@ mod tests {
     }
     #[test]
     fn test_array_out_of_range_positive() {
-        let c: Color = [1000, 10000, 256].try_into();
+        let c: Result<Color, String> = [1000, 10000, 256].try_into();
         assert!(c.is_err());
     }
     #[test]
     fn test_array_out_of_range_negative() {
-        let c: Color = [-10, -256, -1].try_into();
+        let c: Result<Color, String> = [-10, -256, -1].try_into();
         assert!(c.is_err());
     }
     #[test]
     fn test_array_sum() {
-        let c: Color = [-1, 255, 255].try_into();
+        let c: Result<Color, String> = [-1, 255, 255].try_into();
         assert!(c.is_err());
     }
     #[test]
